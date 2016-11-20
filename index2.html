@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>HugeJohn94's chat window</title>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <input type="text" name="chat" v-model="message" placeholder="say something" @keyup.enter="send">
+      <p v-for="m in messages">{{ m }}</p>
+    </div>
+    <script>
+      var chatterId = 'HugeJohn94'
+      var data = {
+        message: '',
+        messages: []
+      }
+      var ws = new WebSocket('ws://localhost:8001')
+      ws.onmessage = function(message) {
+        var [id, message] = message.data.split(':::')
+        if (id === chatterId) {
+          id = 'I'
+        }
+        data.messages.push(`${id} said: ${message}`)
+        data.message = ''
+      }
+      new Vue({
+        el: '#app',
+        data: data,
+        methods: {
+          send: function() {
+            ws.send(`${chatterId}:::${this.message}`)
+          }
+        }
+      })
+    </script>
+  </body>
+</html>
